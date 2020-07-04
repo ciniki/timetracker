@@ -1,0 +1,32 @@
+#
+# Description
+# -----------
+# This table stores the projects the users are assigned to. If they are
+# not assigned to a project, then it won't show in their project list.
+#
+# Fields
+# ------
+# id:                       The ID assigned to the record.
+# uuid:                     The Universal Unique ID.
+# tnid:                     The Tenant ID the record belongs to.
+#
+# project_id:               The ID of the project the entry is attached to.
+# user_id:                  The ID of the user from ciniki.users module.
+#
+# date_added:               The UTC date and time the record was added.
+# last_updated:             The UTC date and time the record was last update.
+#
+create table ciniki_timetracker_users (
+    id int not null auto_increment,
+    uuid char(36) not null,
+    tnid int not null,
+
+    project_id int not null,
+    user_id int not null,
+
+    date_added datetime not null,
+    last_updated datetime not null,
+    primary key (id),
+    unique index (uuid),
+    index sync (tnid, uuid, last_updated)
+) ENGINE='InnoDB', COMMENT='v1.01';

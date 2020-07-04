@@ -1,0 +1,37 @@
+#
+# Description
+# -----------
+#
+# Fields
+# ------
+# id:                       The ID assigned to the record.
+# uuid:                     The Universal Unique ID.
+# tnid:                     The Tenant ID the record belongs to.
+#
+# name:                     The name of the project.
+# status:                   The current status of the project.
+#
+#                               10 - Active 
+#                               50 - Inactive (doesn't show in project list for time tracker)
+#                               90 - Archived (doesn't show in reports)
+#
+# sequence:                 The placement in the project list.
+#
+# date_added:               The UTC date and time the record was added.
+# last_updated:             The UTC date and time the record was last update.
+#
+create table ciniki_timetracker_projects (
+    id int not null auto_increment,
+    uuid char(36) not null,
+    tnid int not null,
+
+    name varchar(50) not null,
+    status tinyint unsigned not null,
+    sequence tinyint unsigned not null,
+
+    date_added datetime not null,
+    last_updated datetime not null,
+    primary key (id),
+    unique index (uuid),
+    index sync (tnid, uuid, last_updated)
+) ENGINE='InnoDB', COMMENT='v1.01';
