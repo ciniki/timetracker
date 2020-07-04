@@ -242,7 +242,7 @@ function ciniki_timetracker_tracker() {
             this.menu.addButton('settings', 'Manage', 'M.startApp(\'ciniki.timetracker.main\',null,\'M.ciniki_timetracker_tracker.menu.open();\');');
             //this.menu.addButton('settings', 'Manage', 'M.ciniki_timetracker_tracker.projects.open(\'M.ciniki_timetracker_tracker.menu.open();\');');
         } else {
-            this.menu.delbutton('settings');
+            this.menu.delButton('settings');
         }
 
         //

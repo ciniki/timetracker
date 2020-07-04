@@ -152,7 +152,7 @@ function ciniki_timetracker_main() {
     //
     // The panel to edit Projects
     //
-    this.project = new M.panel('Projects', 'ciniki_timetracker_main', 'project', 'mc', 'narrow', 'sectioned', 'ciniki.timetracker.main.project');
+    this.project = new M.panel('Projects', 'ciniki_timetracker_main', 'project', 'mc', 'medium', 'sectioned', 'ciniki.timetracker.main.project');
     this.project.data = null;
     this.project.project_id = 0;
     this.project.nplist = [];
