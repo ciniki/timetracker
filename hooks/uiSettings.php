@@ -30,7 +30,7 @@ function ciniki_timetracker_hooks_uiSettings(&$ciniki, $tnid, $args) {
             )
         ) {
         $menu_item = array(
-            'priority'=>5000,
+            'priority'=>4000,
             'label'=>'Time Tracker',
             'edit'=>array('app'=>'ciniki.timetracker.tracker'),
             );
