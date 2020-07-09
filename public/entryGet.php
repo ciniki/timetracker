@@ -52,6 +52,8 @@ function ciniki_timetracker_entryGet($ciniki) {
 
     ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'dateFormat');
     $date_format = ciniki_users_dateFormat($ciniki, 'php');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'datetimeFormat');
+    $datetime_format = ciniki_users_datetimeFormat($ciniki, 'php');
 
     //
     // Return default for new entry
@@ -82,8 +84,9 @@ function ciniki_timetracker_entryGet($ciniki) {
         $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
             array('container'=>'entries', 'fname'=>'id', 
                 'fields'=>array('project_id', 'start_dt', 'end_dt', 'notes'),
-                'utctotz'=>array('start_dt'=>array('timezone'=>$intl_timezone, 'format'=>'M d, Y H:i'),
-                    'end_dt'=>array('timezone'=>$intl_timezone, 'format'=>'M d, Y H:i'),
+                'utctotz'=>array(
+                    'start_dt'=>array('timezone'=>$intl_timezone, 'format'=>$datetime_format),
+                    'end_dt'=>array('timezone'=>$intl_timezone, 'format'=>$datetime_format),
                     ),
                 ),
             ));
