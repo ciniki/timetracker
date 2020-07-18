@@ -94,6 +94,7 @@ function ciniki_timetracker_tracker() {
             }
             var p = M.ciniki_timetracker_tracker.menu;
             p.data = rsp;
+            p.title = 'Projects ' + rsp.today_length_display;
             p.nplist = (rsp.nplist != null ? rsp.nplist : null);
 //            p.updateButtons();
             p.refresh();
@@ -108,6 +109,7 @@ function ciniki_timetracker_tracker() {
             }
             var p = M.ciniki_timetracker_tracker.menu;
             p.data = rsp;
+            p.title = 'Projects ' + rsp.today_length_display;
             p.nplist = (rsp.nplist != null ? rsp.nplist : null);
 //            p.updateButtons();
             p.refresh();
