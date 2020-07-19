@@ -98,8 +98,10 @@ function ciniki_timetracker_tracker($ciniki) {
     }
 
     //
-    // Get the list of recent entries
+    // Get the list of recent entries in the last 30 days
     //
+    $start_dt = new DateTime('now', new DateTimezone($intl_timezone));
+    $start_dt->sub(new DateInterval('P31D'));
     $strsql = "SELECT entries.id, "
         . "entries.project_id, "
         . "projects.name AS project_name, "
@@ -118,6 +120,7 @@ function ciniki_timetracker_tracker($ciniki) {
             . ") "
         . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "AND entries.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
+        . "AND start_dt > '" . ciniki_core_dbQuote($ciniki, $start_dt->format('Y-m-d')) . "' "
         . "ORDER BY start_dt DESC "
         . "LIMIT 50 "
         . "";
@@ -127,8 +130,8 @@ function ciniki_timetracker_tracker($ciniki) {
             'fields'=>array('id', 'project_id', 'project_name', 'start_day', 'start_dt_display', 'end_dt_display', 'length', 'notes'),
             'utctotz'=>array(
                 'start_day'=>array('timezone'=>$intl_timezone, 'format'=>'M d'),
-                'start_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>$datetime_format),
-                'end_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>$datetime_format),
+                'start_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>'M j - ' . $time_format),
+                'end_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>'M j - ' . $time_format),
                 ),
             ),
         ));
