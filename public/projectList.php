@@ -61,6 +61,8 @@ function ciniki_timetracker_projectList($ciniki) {
             'dlists'=>array('userlist'=>', '),
             ),
         ));
+
+        error_log(print_r($rc,true));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }

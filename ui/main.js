@@ -184,6 +184,7 @@ function ciniki_timetracker_main() {
             }
             var p = M.ciniki_timetracker_main.project;
             p.data = rsp.project;
+            p.sections.general.fields.user_ids.options = M.curTenant.employees;
             p.refresh();
             p.show(cb);
         });
