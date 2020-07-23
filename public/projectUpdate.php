@@ -75,7 +75,7 @@ function ciniki_timetracker_projectUpdate(&$ciniki) {
             . "";
         $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'ciniki.timetracker', 'user');
         if( $rc['stat'] != 'ok' ) {
-            return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.15', 'msg'=>'Unable to load users', 'err'=>$rc['err']));
+            return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.22', 'msg'=>'Unable to load users', 'err'=>$rc['err']));
         }
         $cur_users = isset($rc['rows']) ? $rc['rows'] : array();
 
@@ -87,7 +87,7 @@ function ciniki_timetracker_projectUpdate(&$ciniki) {
             if( !in_array($user['user_id'], $args['user_ids']) ) {
                 $rc = ciniki_core_objectDelete($ciniki, $args['tnid'], 'ciniki.timetracker.user', $user['id'], $user['uuid'], 0x04);
                 if( $rc['stat'] != 'ok' ) {
-                    return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.16', 'msg'=>'Unable to remove user', 'err'=>$rc['err']));
+                    return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.24', 'msg'=>'Unable to remove user', 'err'=>$rc['err']));
                 }
             } else {
                 $cur_user_ids[] = $user['user_id'];
@@ -100,7 +100,7 @@ function ciniki_timetracker_projectUpdate(&$ciniki) {
                     'user_id' => $user_id,
                     ), 0x04);
                 if( $rc['stat'] != 'ok' ) {
-                    return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.16', 'msg'=>'Unable to add user', 'err'=>$rc['err']));
+                    return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.23', 'msg'=>'Unable to add user', 'err'=>$rc['err']));
                 }
                 
             }

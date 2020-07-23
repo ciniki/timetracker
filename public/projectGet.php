@@ -101,7 +101,7 @@ function ciniki_timetracker_projectGet($ciniki) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbQueryList');
         $rc = ciniki_core_dbQueryList($ciniki, $strsql, 'ciniki.timetracker', 'users', 'user_id');
         if( $rc['stat'] != 'ok' ) {
-            return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.bugs.11', 'msg'=>'Unable to load bug information', 'err'=>$rc['err']));
+            return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.21', 'msg'=>'Unable to load bug information', 'err'=>$rc['err']));
         }
         $project['user_ids'] = isset($rc['users']) ? implode(',', $rc['users']) : ''; 
     }
