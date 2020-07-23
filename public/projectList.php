@@ -52,7 +52,7 @@ function ciniki_timetracker_projectList($ciniki) {
             . "projectusers.user_id = users.id "
             . ") "
         . "WHERE projects.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-        . "ORDER BY projects.status, projects.sequence, users.display_name "
+        . "ORDER BY projects.status, projects.sequence, projects.name, projects.id, users.display_name "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
@@ -61,8 +61,6 @@ function ciniki_timetracker_projectList($ciniki) {
             'dlists'=>array('userlist'=>', '),
             ),
         ));
-
-        error_log(print_r($rc,true));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
