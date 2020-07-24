@@ -104,12 +104,12 @@ function ciniki_timetracker_reporting_blockDaily(&$ciniki, $tnid, $args) {
             );
         $chunk['textlist'] .= "\n";
         foreach($stats['columns'] as $column) {
-            $chunk['textlist'] .= sprintf("%{$column[txtwidth]}s", $column['label']);
+            $chunk['textlist'] .= sprintf("%{$column['txtwidth']}s", $column['label']);
         }
         foreach($user['projects'] as $project) {
             $chunk['textlist'] .= "\n";
             foreach($stats['columns'] as $column) {
-                $chunk['textlist'] .= sprintf("%{$column[txtwidth]}s", (isset($project[$column['field']]) ? $project[$column['field']]: ''));
+                $chunk['textlist'] .= sprintf("%{$column['txtwidth']}s", (isset($project[$column['field']]) ? $project[$column['field']]: ''));
             }
         }
         $chunk['textlist'] .= "\n\n";
