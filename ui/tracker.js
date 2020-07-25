@@ -23,13 +23,13 @@ function ciniki_timetracker_tracker() {
         if( s == 'projects' ) {
             switch(j) {
                 case 0: return d.name;
-                case 1: 
+                case 1: return (d.today_length_display != null ? d.today_length_display : '-');
+                case 2: 
                     if( d.entry_id > 0 ) {
-                        return 'Stop';
+                        return '<button onclick="M.ciniki_timetracker_tracker.menu.stopEntry(\'' + d.entry_id + '\');">Stop</button>';
                     } else {
-                        return 'Start';
+                        return '<button onclick="M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.id + '\');">Stop</button>';
                     }
-                case 2: return (d.today_length_display != null ? d.today_length_display : '-');
             }
         }
         if( s == 'entries' ) {
@@ -59,13 +59,13 @@ function ciniki_timetracker_tracker() {
         }
     }
     this.menu.rowFn = function(s, i, d) {
-        if( s == 'projects' ) {
+/*        if( s == 'projects' ) {
             if( d.entry_id > 0 ) {
                 return 'M.ciniki_timetracker_tracker.menu.stopEntry(\'' + d.entry_id + '\');';
             } else {
                 return 'M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.id + '\');';
             }
-        }
+        } */
         if( s == 'entries' ) {
             return 'M.ciniki_timetracker_tracker.entry.open(\'M.ciniki_timetracker_tracker.menu.open();\',\'' + d.id + '\');';
         }
