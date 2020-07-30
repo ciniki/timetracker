@@ -43,6 +43,9 @@ function ciniki_timetracker_reporting_block(&$ciniki, $tnid, $args) {
     } elseif( $args['block_ref'] == 'ciniki.timetracker.weekly' ) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'timetracker', 'reporting', 'blockWeekly');
         return ciniki_timetracker_reporting_blockWeekly($ciniki, $tnid, $args['options']);
+    } elseif( $args['block_ref'] == 'ciniki.timetracker.todaysentries' ) {
+        ciniki_core_loadMethod($ciniki, 'ciniki', 'timetracker', 'reporting', 'blockTodaysEntries');
+        return ciniki_timetracker_reporting_blockTodaysEntries($ciniki, $tnid, $args['options']);
     }
 
     return array('stat'=>'ok');

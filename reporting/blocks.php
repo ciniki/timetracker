@@ -42,6 +42,13 @@ function ciniki_timetracker_reporting_blocks(&$ciniki, $tnid, $args) {
             // 'weeks'=>array('label'=>'Number of Weeks Previous', 'type'=>'text', 'size'=>'small', 'default'=>'4'),
             ),
         );
+    $blocks['ciniki.timetracker.todaysentries'] = array(
+        'name'=>'Today Time Logs',
+        'module' => 'Time Tracker',
+        'options'=>array(
+            // 'weeks'=>array('label'=>'Number of Weeks Previous', 'type'=>'text', 'size'=>'small', 'default'=>'4'),
+            ),
+        );
 
     return array('stat'=>'ok', 'blocks'=>$blocks);
 }
