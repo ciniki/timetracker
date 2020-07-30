@@ -123,7 +123,6 @@ function ciniki_timetracker_reporting_blockTodaysEntries(&$ciniki, $tnid, $args)
 
     if( count($entries) > 0 ) {
         $chunk = array(
-            'title'=>"Today's Time Log",
             'type'=>'table',
             'columns' => array(
                 array('label'=>'Employee', 'pdfwidth'=>'30%', 'field'=>'display_name'),
