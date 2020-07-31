@@ -93,7 +93,6 @@ function ciniki_timetracker_reporting_blockTodaysEntries(&$ciniki, $tnid, $args)
         . "AND entries.end_dt <= '" . ciniki_core_dbQuote($ciniki, $end_dt->format('Y-m-d H:i:s')) . "' "
         . "ORDER BY users.display_name, entries.start_dt "
         . "";
-    error_log($strsql);
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'entries', 'fname'=>'id', 
