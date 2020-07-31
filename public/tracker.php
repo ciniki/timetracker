@@ -174,7 +174,8 @@ function ciniki_timetracker_tracker($ciniki) {
     $strsql = "SELECT projects.id, "
         . "projects.name, "
         . "projects.status, "
-        . "IFNULL(entries.id, 0) AS entry_id "
+        . "IFNULL(entries.id, 0) AS entry_id, "
+        . "IFNULL(entries.notes, '') AS notes "
         . "FROM ciniki_timetracker_projects AS projects "
         . "INNER JOIN ciniki_timetracker_users AS users ON ("
             . "projects.id = users.project_id "
@@ -194,7 +195,7 @@ function ciniki_timetracker_tracker($ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'projects', 'fname'=>'id', 
-            'fields'=>array('id', 'name', 'status', 'entry_id')),
+            'fields'=>array('id', 'name', 'status', 'entry_id', 'notes')),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
