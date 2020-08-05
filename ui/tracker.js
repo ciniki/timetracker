@@ -28,7 +28,7 @@ function ciniki_timetracker_tracker() {
                     if( d.entry_id > 0 ) {
                         return '<button onclick="M.ciniki_timetracker_tracker.menu.stopEntry(\'' + d.entry_id + '\');">Stop</button>';
                     } else {
-                        return '<button onclick="M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.id + '\');">Stop</button>';
+                        return '<button onclick="M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.id + '\');">Start</button>';
                     }
             }
         }
