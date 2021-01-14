@@ -117,6 +117,7 @@ function ciniki_timetracker_tracker() {
         });
     }
     this.menu.open = function(cb) {
+        console.log('open');
         M.api.getJSONCb('ciniki.timetracker.tracker', {'tnid':M.curTenantID}, function(rsp) {
             if( rsp.stat != 'ok' ) {
                 M.api.err(rsp);
@@ -129,6 +130,8 @@ function ciniki_timetracker_tracker() {
 //            p.updateButtons();
             p.refresh();
             p.show(cb);
+            console.log('set timeout');
+            p.timeout = setTimeout(M.ciniki_timetracker_tracker.menu.open, (5*60*1000));
         });
     }
     this.menu.addButton('refresh', 'Refresh', 'M.ciniki_timetracker_tracker.menu.open();');
