@@ -130,8 +130,10 @@ function ciniki_timetracker_tracker() {
 //            p.updateButtons();
             p.refresh();
             p.show(cb);
-            console.log('set timeout');
-            p.timeout = setTimeout(M.ciniki_timetracker_tracker.menu.open, (5*60*1000));
+//          Timeout causes this page to reload when navigated away from it. Need to fix
+//          add shutoff for timer when close/click home.
+//            p.timeout = setTimeout(M.ciniki_timetracker_tracker.menu.open, (5*60*1000));
+
         });
     }
     this.menu.addButton('refresh', 'Refresh', 'M.ciniki_timetracker_tracker.menu.open();');
