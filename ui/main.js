@@ -12,6 +12,7 @@ function ciniki_timetracker_main() {
         'daily':{'label':'Daily', 'fn':'M.ciniki_timetracker_main.menu.switchTab("daily");'},
         'weekly':{'label':'Weekly', 'fn':'M.ciniki_timetracker_main.menu.switchTab("weekly");'},
         'monthly':{'label':'Monthly', 'fn':'M.ciniki_timetracker_main.menu.switchTab("monthly");'},
+//        'entries':{'label':'Entries', 'fn':'M.ciniki_timetracker_main.menu.switchTab("entries");'},
         'projects':{'label':'Projects', 'fn':'M.ciniki_timetracker_main.menu.switchTab("projects");'},
         }};
     this.menu.start_dt = '';
@@ -71,6 +72,8 @@ function ciniki_timetracker_main() {
         if( cb != null ) { this.cb = cb; }
         if( this._tabs.selected == 'projects' ) {
             M.api.getJSONCb('ciniki.timetracker.projectList', {'tnid':M.curTenantID}, this.openFinish);
+        } else if( this._tabs.selected == 'entries' ) {
+            M.api.getJSONCb('ciniki.timetracker.entries', {'tnid':M.curTenantID}, this.openFinish);
         } else {
             M.api.getJSONCb('ciniki.timetracker.projectStats', {'tnid':M.curTenantID, 'report':this._tabs.selected, 'start_dt':this.start_dt, 'end_dt':this.end_dt}, this.openFinish);
         }
@@ -115,6 +118,8 @@ function ciniki_timetracker_main() {
                 delete rsp.users[i].projects.total;
                 p.data['user_' + rsp.users[i].id] = rsp.users[i].projects;
             }
+//        } else if( p._tabs.selected == 'entries' ) {
+//            p.sections['
         } else if( p._tabs.selected == 'projects' ) {
             p.sections['projects'] = {'label':'Projects', 'type':'simplegrid', 'num_cols':3,
                 'headerValues':['Order', 'Project', 'Users'],
@@ -244,6 +249,8 @@ function ciniki_timetracker_main() {
     this.project.addClose('Cancel');
     this.project.addButton('next', 'Next');
     this.project.addLeftButton('prev', 'Prev');
+
+
 
     //
     // Start the app

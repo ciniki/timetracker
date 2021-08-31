@@ -5,11 +5,11 @@ function ciniki_timetracker_tracker() {
     //
     // The panel to list the project
     //
-    this.menu = new M.panel('Projects', 'ciniki_timetracker_tracker', 'menu', 'mc', 'medium', 'sectioned', 'ciniki.timetracker.main.menu');
+    this.menu = new M.panel('Projects', 'ciniki_timetracker_tracker', 'menu', 'mc', 'medium narrowaside', 'sectioned', 'ciniki.timetracker.main.menu');
     this.menu.data = {};
     this.menu.nplist = [];
     this.menu.sections = {
-        'projects':{'label':'', 'type':'simplegrid', 'num_cols':3,
+        'projects':{'label':'', 'type':'simplegrid', 'num_cols':3, 'aside':'yes',
             'cellClasses':['', '', 'alignright'],
             'footerClasses':['', '', 'alignright'],
             'noData':'No projects',
@@ -148,6 +148,7 @@ function ciniki_timetracker_tracker() {
     this.entry.nplist = [];
     this.entry.sections = {
         'general':{'label':'', 'fields':{
+            'project_id':{'label':'Project', 'type':'select', 'options':{}, 'complex_options':{'value':'id', 'name':'name'}},
             'start_dt':{'label':'Start', 'type':'text'},
             'end_dt':{'label':'End', 'type':'text'},
             'notes':{'label':'Notes', 'type':'textarea', 'size':'small'},
@@ -173,6 +174,7 @@ function ciniki_timetracker_tracker() {
             }
             var p = M.ciniki_timetracker_tracker.entry;
             p.data = rsp.entry;
+            p.sections.general.fields.project_id.options = rsp.projects;
             p.refresh();
             p.show(cb);
         });

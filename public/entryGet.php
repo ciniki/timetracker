@@ -99,6 +99,39 @@ function ciniki_timetracker_entryGet($ciniki) {
         $entry = $rc['entries'][0];
     }
 
-    return array('stat'=>'ok', 'entry'=>$entry);
+    $rsp = array('stat'=>'ok', 'entry'=>$entry);
+
+    //
+    // Get the list of projects
+    //
+    $strsql = "SELECT projects.id, "
+        . "projects.sequence, "
+        . "projects.name, "
+        . "projects.status, "
+        . "users.display_name AS userlist "
+        . "FROM ciniki_timetracker_projects AS projects "
+        . "LEFT JOIN ciniki_timetracker_users AS projectusers ON ("
+            . "projects.id = projectusers.project_id "
+            . "AND projectusers.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . ") "
+        . "LEFT JOIN ciniki_users AS users ON ("
+            . "projectusers.user_id = users.id "
+            . ") "
+        . "WHERE projects.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "ORDER BY projects.status, projects.sequence, projects.name, projects.id, users.display_name "
+        . "";
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+    $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
+        array('container'=>'projects', 'fname'=>'id', 
+            'fields'=>array('id', 'sequence', 'name', 'status', 'userlist'),
+            'dlists'=>array('userlist'=>', '),
+            ),
+        ));
+    if( $rc['stat'] != 'ok' ) {
+        return $rc;
+    }
+    $rsp['projects'] = isset($rc['projects']) ? $rc['projects'] : array();
+
+    return $rsp;
 }
 ?>
