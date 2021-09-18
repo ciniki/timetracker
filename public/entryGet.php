@@ -110,7 +110,7 @@ function ciniki_timetracker_entryGet($ciniki) {
     if( ciniki_core_checkModuleFlags($ciniki, 'ciniki.timetracker', 0x02) && $entry['customer_id'] > 0 ) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'customers', 'hooks', 'customerDetails2');
         $rc = ciniki_customers_hooks_customerDetails2($ciniki, $args['tnid'], 
-            array('customer_id'=>$entry['customer_id'], 'phone'=>'yes', 'emails'=>'yes', 'address'=>'yes'),
+            array('customer_id'=>$entry['customer_id'], 'phone'=>'yes', 'emails'=>'yes', 'address'=>'yes')
         );
         if( $rc['stat'] != 'ok' ) {
             return $rc;
