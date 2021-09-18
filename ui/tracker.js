@@ -13,12 +13,16 @@ function ciniki_timetracker_tracker() {
             'cellClasses':['', '', 'alignright'],
             'footerClasses':['', '', 'alignright'],
             'noData':'No projects',
+            'addTxt':'Add Entry',
+            'addFn':'M.ciniki_timetracker_tracker.entry.open(\'M.ciniki_timetracker_tracker.menu.open();\', 0);',
             },
         'entries':{'label':'Recent', 'type':'simplegrid', 'num_cols':3,
             'cellClasses':['multiline', 'multiline', ''],
+            'dataMaps':['name', 'time', 'length'],
             'limit':15,
             },
     }
+
     this.menu.cellValue = function(s, i, j, d) {
         if( s == 'projects' ) {
             switch(j) {
@@ -33,10 +37,23 @@ function ciniki_timetracker_tracker() {
             }
         }
         if( s == 'entries' ) {
-            switch(j) {
-                case 0: return M.multiline(d.project_name, d.notes);
-                case 1: return M.multiline(d.start_dt_display, (d.end_dt_display != '' ? d.end_dt_display : '-'));
-                case 2: return d.length_display;
+            if( this.sections['entries'].dataMaps[j] == 'name' ) {
+                return M.multiline(d.project_name, d.notes);
+            }
+            if( this.sections['entries'].dataMaps[j] == 'customer' ) {
+                if( M.modFlagAny('ciniki.timetracker', 0x03) ) {
+                    return M.multiline(d.display_name, d.module);
+                } else if( M.modFlagAny('ciniki.timetracker', 0x01) ) {
+                    return M.multiline(d.module, '');
+                } else if( M.modFlagAny('ciniki.timetracker', 0x02) ) {
+                    return M.multiline(d.display_name, '');
+                }
+            }
+            if( this.sections['entries'].dataMaps[j] == 'time' ) {
+                return M.multiline(d.start_dt_display, (d.end_dt_display != '' ? d.end_dt_display : '-'));
+            }
+            if( this.sections['entries'].dataMaps[j] == 'length' ) {
+                return d.length_display;
             }
         }
     }
@@ -117,7 +134,6 @@ function ciniki_timetracker_tracker() {
         });
     }
     this.menu.open = function(cb) {
-        console.log('open');
         M.api.getJSONCb('ciniki.timetracker.tracker', {'tnid':M.curTenantID}, function(rsp) {
             if( rsp.stat != 'ok' ) {
                 M.api.err(rsp);
@@ -147,8 +163,17 @@ function ciniki_timetracker_tracker() {
     this.entry.entry_id = 0;
     this.entry.nplist = [];
     this.entry.sections = {
+        'customer_details':{'label':'Customer', 'type':'simplegrid', 'num_cols':2, 'aside':'yes',
+            'visible':function() { return M.modFlagSet('ciniki.timetracker', 0x02); },
+            'cellClasses':['label', ''],
+            'changeTxt':'Change Customer',
+            'changeFn':'M.ciniki_timetracker_tracker.entry.changeCustomer();',
+            },
         'general':{'label':'', 'fields':{
             'project_id':{'label':'Project', 'type':'select', 'options':{}, 'complex_options':{'value':'id', 'name':'name'}},
+            'module':{'label':'Module', 'type':'text', 'livesearch':'yes', 'livesearchempty':'yes', 
+                'visible':function() { return M.modFlagSet('ciniki.timetracker', 0x01); },
+                },
             'start_dt':{'label':'Start', 'type':'text'},
             'end_dt':{'label':'End', 'type':'text'},
             'notes':{'label':'Notes', 'type':'textarea', 'size':'small'},
@@ -163,6 +188,54 @@ function ciniki_timetracker_tracker() {
     this.entry.fieldValue = function(s, i, d) { return this.data[i]; }
     this.entry.fieldHistoryArgs = function(s, i) {
         return {'method':'ciniki.timetracker.entryHistory', 'args':{'tnid':M.curTenantID, 'entry_id':this.entry_id, 'field':i}};
+    }
+    this.entry.liveSearchCb = function(s, i, value) {
+        if( i == 'module' ) {
+            M.api.getJSONBgCb('ciniki.timetracker.entryFieldSearch', {'tnid':M.curTenantID, 'field':i, 'start_needle':value, 'limit':25},
+                function(rsp) {
+                    M.ciniki_timetracker_tracker.entry.liveSearchShow(s, i, M.gE(M.ciniki_timetracker_tracker.entry.panelUID + '_' + i), rsp.results);
+                });
+        }
+    };
+    this.entry.liveSearchResultValue = function(s, f, i, j, d) {
+        if( (f == 'module' ) && d != null ) { return d.value; }
+        return '';
+    };
+    this.entry.liveSearchResultRowFn = function(s, f, i, j, d) { 
+        if( (f == 'module' ) && d != null ) {
+            return 'M.ciniki_timetracker_tracker.entry.updateField(\'' + s + '\',\'' + f + '\',\'' + escape(d.value) + '\');';
+        }
+    };
+    this.entry.updateField = function(s, i, v) {
+        M.gE(this.panelUID + '_' + fid).value = unescape(v);
+        this.removeLiveSearch(s, fid);
+    };
+    this.entry.cellValue = function(s, i, j, d) {
+        if( s == 'customer_details' ) {
+            switch(j) {
+                case 0: return d.label;
+                case 1: return (d.label == 'Email' ? M.linkEmail(d.value) : d.value);
+            }
+        }
+    }
+    this.entry.rowFn = function(s, i, d) {
+        return '';
+    }
+    this.entry.changeCustomer = function() {
+        this.save('M.startApp(\'ciniki.customers.edit\',null,\'M.ciniki_timetracker_tracker.entry.updateCustomer();\',\'mc\',{\'next\':\'M.ciniki_timetracker_tracker.entry.updateCustomer\',\'customer_id\':M.ciniki_timetracker_tracker.entry.data.customer_id,\'action\':\'change\',\'current_id\':M.ciniki_timetracker_tracker.entry.data.customer_id});');
+    }
+    this.entry.updateCustomer = function(cid) {
+        if( cid != null && this.data.customer_id != cid ) {
+            M.api.getJSONCb('ciniki.timetracker.entryUpdate', {'tnid':M.curTenantID, 'entry_id':this.entry_id, 'customer_id':cid}, function(rsp) {
+                if( rsp.stat != 'ok' ) {
+                    M.api.err(rsp);
+                    return false;
+                }
+                M.ciniki_timetracker_tracker.entry.open();
+            });
+        } else {
+            this.show();
+        }
     }
     this.entry.open = function(cb, eid, list) {
         if( eid != null ) { this.entry_id = eid; }
@@ -252,6 +325,25 @@ function ciniki_timetracker_tracker() {
             //this.menu.addButton('settings', 'Manage', 'M.ciniki_timetracker_tracker.projects.open(\'M.ciniki_timetracker_tracker.menu.open();\');');
         } else {
             this.menu.delButton('settings');
+        }
+    
+        //
+        // Setup for modules
+        //
+        if( M.modFlagOn('ciniki.timetracker', 0x02) ) {
+            this.entry.size = 'medium mediumaside';
+        } else {
+            this.entry.size = 'medium';
+        }
+        // Modules or Customers enabled
+        if( M.modFlagAny('ciniki.timetracker', 0x03) == 'yes' ) {
+            this.menu.sections.entries.num_cols = 4;
+            this.menu.sections.entries.cellClasses = ['multiline', 'multiline', 'multiline', ''];
+            this.menu.sections.entries.dataMaps = ['name', 'customer', 'time', 'length'];
+        } else {
+            this.menu.sections.entries.num_cols = 3;
+            this.menu.sections.entries.cellClasses = ['multiline', 'multiline', ''];
+            this.menu.sections.entries.dataMaps = ['name', 'time', 'length'];
         }
 
         //

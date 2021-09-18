@@ -22,6 +22,8 @@ function ciniki_timetracker_tracker($ciniki) {
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'action'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Action'),
         'project_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Project'),
+        'module'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Module'),
+        'customer_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Customer'),
         'entry_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Entry'),
         ));
     if( $rc['stat'] != 'ok' ) {
@@ -65,6 +67,8 @@ function ciniki_timetracker_tracker($ciniki) {
         $dt = new DateTime('now', new DateTimezone('UTC'));
         $entry = array(
             'project_id' => $args['project_id'],
+            'module' => isset($args['module']) ? $args['module'] : '',
+            'customer_id' => isset($args['customer_id']) ? $args['customer_id'] : 0,
             'user_id' => $ciniki['session']['user']['id'],
             'start_dt' => $dt->format('Y-m-d H:i:s'),
             'end_dt' => '',
@@ -105,9 +109,11 @@ function ciniki_timetracker_tracker($ciniki) {
     $strsql = "SELECT entries.id, "
         . "entries.project_id, "
         . "projects.name AS project_name, "
+        . "entries.module, "
         . "entries.start_dt AS start_day, "
         . "entries.start_dt AS start_dt_display, "
         . "entries.end_dt AS end_dt_display, "
+        . "IFNULL(customers.display_name, '') AS display_name, "
         . "IF( entries.end_dt <> '0000-00-00 00:00:00', "
             . "(UNIX_TIMESTAMP(entries.end_dt)-UNIX_TIMESTAMP(entries.start_dt)), "
             . "(UNIX_TIMESTAMP(UTC_TIMESTAMP())-UNIX_TIMESTAMP(entries.start_dt)) "
@@ -118,6 +124,10 @@ function ciniki_timetracker_tracker($ciniki) {
             . "entries.project_id = projects.id "
             . "AND projects.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
             . ") "
+        . "LEFT JOIN ciniki_customers AS customers ON ("
+            . "entries.customer_id = customers.id "
+            . "AND customers.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . ") "
         . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "AND entries.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
         . "AND start_dt > '" . ciniki_core_dbQuote($ciniki, $start_dt->format('Y-m-d')) . "' "
@@ -127,7 +137,7 @@ function ciniki_timetracker_tracker($ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'entries', 'fname'=>'id', 
-            'fields'=>array('id', 'project_id', 'project_name', 'start_day', 'start_dt_display', 'end_dt_display', 'length', 'notes'),
+            'fields'=>array('id', 'project_id', 'project_name', 'module', 'display_name', 'start_day', 'start_dt_display', 'end_dt_display', 'length', 'notes'),
             'utctotz'=>array(
                 'start_day'=>array('timezone'=>$intl_timezone, 'format'=>'M d'),
                 'start_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>'M j - ' . $time_format),
@@ -190,7 +200,7 @@ function ciniki_timetracker_tracker($ciniki) {
             . ") "
         . "WHERE projects.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "AND projects.status = 10 "
-        . "ORDER BY sequence "
+        . "ORDER BY projects.sequence "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(

@@ -18,6 +18,8 @@ function ciniki_timetracker_entryUpdate(&$ciniki) {
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'entry_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'entry'),
         'project_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Project'),
+        'module'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Module'),
+        'customer_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Customer'),
         'user_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'User'),
         'start_dt'=>array('required'=>'no', 'blank'=>'yes', 'type'=>'datetimetoutc', 'name'=>'Start'),
         'end_dt'=>array('required'=>'no', 'blank'=>'yes', 'type'=>'datetimetoutc', 'name'=>'End'),

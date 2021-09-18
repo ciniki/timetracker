@@ -36,6 +36,8 @@ function ciniki_timetracker_objects(&$ciniki) {
         'table' => 'ciniki_timetracker_entries',
         'fields' => array(
             'project_id' => array('name'=>'Project', 'ref'=>'ciniki.timetracker.project'),
+            'module' => array('name'=>'Module', 'default'=>''),
+            'customer_id' => array('name'=>'Customer', 'ref'=>'ciniki.customers.customer', 'default'=>0),
             'user_id' => array('name'=>'User', 'ref'=>'ciniki.users.user'),
             'start_dt' => array('name'=>'Start', 'default'=>''),
             'end_dt' => array('name'=>'End', 'default'=>''),

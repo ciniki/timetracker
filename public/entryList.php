@@ -40,6 +40,8 @@ function ciniki_timetracker_entryList($ciniki) {
     //
     $strsql = "SELECT ciniki_timetracker_entries.id, "
         . "ciniki_timetracker_entries.project_id, "
+        . "ciniki_timetracker_entries.module, "
+        . "ciniki_timetracker_entries.customer_id, "
         . "ciniki_timetracker_entries.start_dt, "
         . "ciniki_timetracker_entries.end_dt, "
         . "ciniki_timetracker_entries.notes "
