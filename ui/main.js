@@ -44,7 +44,7 @@ function ciniki_timetracker_main() {
         }
     }
     this.menu.cellFn = function(s, i, j, d) {
-        if( j > 0 && j < (this.sections[s].num_cols-1) ) {
+        if( s != 'projects' && j > 0 && j < (this.sections[s].num_cols-1) ) {
             return 'M.ciniki_timetracker_main.entries.open(\'M.ciniki_timetracker_main.menu.open();\',\'' + (d.id != null ? d.id : '*') + '\',\'' + (d.module != null ? d.module : '*') + '\',\'' + (d.customer_id != null ? d.customer_id : '*') + '\',\'' + this.data.columns[j].start_dt + '\',\'' + this.data.columns[j].end_dt + '\');';
         }
     }
