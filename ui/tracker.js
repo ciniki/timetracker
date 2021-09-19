@@ -206,7 +206,7 @@ function ciniki_timetracker_tracker() {
             return 'M.ciniki_timetracker_tracker.entry.updateField(\'' + s + '\',\'' + f + '\',\'' + escape(d.value) + '\');';
         }
     };
-    this.entry.updateField = function(s, i, v) {
+    this.entry.updateField = function(s, fid, v) {
         M.gE(this.panelUID + '_' + fid).value = unescape(v);
         this.removeLiveSearch(s, fid);
     };
