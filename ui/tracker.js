@@ -5,7 +5,7 @@ function ciniki_timetracker_tracker() {
     //
     // The panel to list the project
     //
-    this.menu = new M.panel('Projects', 'ciniki_timetracker_tracker', 'menu', 'mc', 'medium narrowaside', 'sectioned', 'ciniki.timetracker.main.menu');
+    this.menu = new M.panel('Projects', 'ciniki_timetracker_tracker', 'menu', 'mc', 'large narrowaside', 'sectioned', 'ciniki.timetracker.main.menu');
     this.menu.data = {};
     this.menu.nplist = [];
     this.menu.sections = {
