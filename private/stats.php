@@ -103,25 +103,34 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
     $dt = clone $args['start_dt'];
     while($dt < $args['end_dt']) {
         if( $args['report'] == 'daily' ) {
-            $columns[] = array(
+            $column = array(
                 'label' => $dt->format('M j'),
                 'field' => $dt->format('Y-m-d') . '_display',
+                'start_dt' => $dt->format('Y-m-d'),
                 );
             $dt->add(new DateInterval('P1D'));
+            $column['end_dt'] = $dt->format('Y-m-d');
+            $columns[] = $column;
         }
         elseif( $args['report'] == 'weekly' ) {
-            $columns[] = array(
+            $column = array(
                 'label' => $dt->format('M j'),
                 'field' => $dt->format('Y-W') . '_display',
+                'start_dt' => $dt->format('Y-m-d'),
                 );
             $dt->add(new DateInterval('P7D'));
+            $column['end_dt'] = $dt->format('Y-m-d');
+            $columns[] = $column;
         }
         elseif( $args['report'] == 'monthly' ) {
-            $columns[] = array(
+            $column = array(
                 'label' => $dt->format('M Y'),
                 'field' => $dt->format('Y-m') . '_display',
+                'start_dt' => $dt->format('Y-m-d'),
                 );
             $dt->add(new DateInterval('P1M'));
+            $column['end_dt'] = $dt->format('Y-m-d');
+            $columns[] = $column;
         }
     }
     $columns[] = array(

@@ -20,6 +20,11 @@ function ciniki_timetracker_entryList($ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
+        'project_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Project'),
+        'module'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Module'),
+        'customer_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Customer'),
+        'start_dt'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Start'),
+        'end_dt'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'End'),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -38,20 +43,50 @@ function ciniki_timetracker_entryList($ciniki) {
     //
     // Get the list of entries
     //
-    $strsql = "SELECT ciniki_timetracker_entries.id, "
-        . "ciniki_timetracker_entries.project_id, "
-        . "ciniki_timetracker_entries.module, "
-        . "ciniki_timetracker_entries.customer_id, "
-        . "ciniki_timetracker_entries.start_dt, "
-        . "ciniki_timetracker_entries.end_dt, "
-        . "ciniki_timetracker_entries.notes "
-        . "FROM ciniki_timetracker_entries "
-        . "WHERE ciniki_timetracker_entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+    $strsql = "SELECT entries.id, "
+        . "entries.project_id, "
+        . "IFNULL(projects.name, '') AS project_name, "
+        . "entries.module, "
+        . "entries.customer_id, "
+        . "IFNULL(customers.display_name, '') AS display_name, "
+        . "entries.start_dt, "
+        . "entries.end_dt, "
+        . "DATE_FORMAT(entries.start_dt, '%b %e, %Y - %l:%i %p') AS start_display, "
+        . "DATE_FORMAT(entries.end_dt, '%b %e, %Y - %l:%i %p') AS end_display, "
+        . "entries.notes "
+        . "FROM ciniki_timetracker_entries AS entries "
+        . "LEFT JOIN ciniki_timetracker_projects AS projects ON ("
+            . "entries.project_id = projects.id "
+            . "AND projects.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . ") "
+        . "LEFT JOIN ciniki_customers AS customers ON ("
+            . "entries.customer_id = customers.id "
+            . "AND customers.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . ") "
+        . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "";
+    if( isset($args['project_id']) && $args['project_id'] != '*' ) {
+        $strsql .= "AND entries.project_id = '" . ciniki_core_dbQuote($ciniki, $args['project_id']) . "' ";
+    }
+    if( isset($args['module']) && $args['module'] != '*' ) {
+        $strsql .= "AND entries.module = '" . ciniki_core_dbQuote($ciniki, $args['module']) . "' ";
+    }
+    if( isset($args['customer_id']) && $args['customer_id'] != '*' ) {
+        $strsql .= "AND entries.customer_id = '" . ciniki_core_dbQuote($ciniki, $args['customer_id']) . "' ";
+    }
+    if( isset($args['start_dt']) && $args['start_dt'] != '' ) {
+        $strsql .= "AND entries.start_dt >= '" . ciniki_core_dbQuote($ciniki, $args['start_dt']) . "' ";
+    }
+    if( isset($args['end_dt']) && $args['end_dt'] != '' ) {
+        $strsql .= "AND entries.end_dt >= '" . ciniki_core_dbQuote($ciniki, $args['end_dt']) . "' ";
+    }
+    $strsql .= "ORDER BY entries.start_dt "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'entries', 'fname'=>'id', 
-            'fields'=>array('id', 'project_id', 'start_dt', 'end_dt', 'notes')),
+            'fields'=>array('id', 'project_id', 'project_name', 'module', 'customer_id', 'display_name', 'start_dt', 'end_dt', 
+                'start_display', 'end_display', 'notes')),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
