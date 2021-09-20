@@ -55,6 +55,9 @@ function ciniki_timetracker_tracker() {
             if( this.sections['entries'].dataMaps[j] == 'length' ) {
                 return d.length_display;
             }
+            if( this.sections['entries'].dataMaps[j] == 'start' ) {
+                return '<button onclick="M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.project_id + '\',\'' + escape(d.module) + '\',\'' + d.customer_id + '\',\'' + escape(d.notes) + '\');">Start</button>';
+            }
         }
     }
 /*    this.menu.footerValue = function(s, i, j, d) {
@@ -103,8 +106,8 @@ function ciniki_timetracker_tracker() {
             }
         }
     } */
-    this.menu.startEntry = function(id) {
-        M.api.getJSONCb('ciniki.timetracker.tracker', {'tnid':M.curTenantID, 'action':'start', 'project_id':id}, function(rsp) {
+    this.menu.startEntry = function(id,m,cid,n) {
+        M.api.getJSONCb('ciniki.timetracker.tracker', {'tnid':M.curTenantID, 'action':'start', 'project_id':id, 'module':(m != null ? unescape(m) : ''), 'customer_id':(cid != null ? cid : 0), 'notes':(n != null ? unescape(n) : '')}, function(rsp) {
             if( rsp.stat != 'ok' ) {
                 M.api.err(rsp);
                 return false;
@@ -337,9 +340,9 @@ function ciniki_timetracker_tracker() {
         }
         // Modules or Customers enabled
         if( M.modFlagAny('ciniki.timetracker', 0x03) == 'yes' ) {
-            this.menu.sections.entries.num_cols = 4;
-            this.menu.sections.entries.cellClasses = ['multiline', 'multiline', 'multiline', ''];
-            this.menu.sections.entries.dataMaps = ['name', 'customer', 'time', 'length'];
+            this.menu.sections.entries.num_cols = 5;
+            this.menu.sections.entries.cellClasses = ['multiline', 'multiline', 'multiline', '', ''];
+            this.menu.sections.entries.dataMaps = ['name', 'customer', 'time', 'length', 'start'];
         } else {
             this.menu.sections.entries.num_cols = 3;
             this.menu.sections.entries.cellClasses = ['multiline', 'multiline', ''];
