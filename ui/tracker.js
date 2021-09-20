@@ -56,7 +56,7 @@ function ciniki_timetracker_tracker() {
                 return d.length_display;
             }
             if( this.sections['entries'].dataMaps[j] == 'start' ) {
-                return '<button onclick="M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.project_id + '\',\'' + escape(d.module) + '\',\'' + d.customer_id + '\',\'' + escape(d.notes) + '\');">Start</button>';
+                return '<button onclick="event.stopPropagation();M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.project_id + '\',\'' + escape(d.module) + '\',\'' + d.customer_id + '\',\'' + escape(d.notes) + '\');">Start</button>';
             }
         }
     }
