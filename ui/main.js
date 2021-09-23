@@ -51,7 +51,16 @@ function ciniki_timetracker_main() {
     }
     this.menu.cellFn = function(s, i, j, d) {
         if( s != 'projects' && j > 0 && j < (this.sections[s].num_cols-1) ) {
-            return 'M.ciniki_timetracker_main.entries.open(\'M.ciniki_timetracker_main.menu.open();\',\'' + (d.id != null ? d.id : '*') + '\',\'' + (d.module != null ? d.module : '*') + '\',\'' + (d.customer_id != null ? d.customer_id : '*') + '\',\'' + this.data.columns[j].start_dt + '\',\'' + this.data.columns[j].end_dt + '\');';
+            if( this._field_tabs.selected == 'type' ) {
+                return 'M.ciniki_timetracker_main.entries.open(\'M.ciniki_timetracker_main.menu.open();\',\'entrytype\',\'' + (d.name != null ? d.name : '*') + '\',\'' + this.data.columns[j].start_dt + '\',\'' + this.data.columns[j].end_dt + '\');';
+            } else if( this._field_tabs.selected == 'project' ) {
+                return 'M.ciniki_timetracker_main.entries.open(\'M.ciniki_timetracker_main.menu.open();\',\'project\',\'' + (d.name != null ? d.name : '*') + '\',\'' + this.data.columns[j].start_dt + '\',\'' + this.data.columns[j].end_dt + '\');';
+            } else if( this._field_tabs.selected == 'module' ) {
+                return 'M.ciniki_timetracker_main.entries.open(\'M.ciniki_timetracker_main.menu.open();\',\'module\',\'' + (d.name != null ? d.name : '*') + '\',\'' + this.data.columns[j].start_dt + '\',\'' + this.data.columns[j].end_dt + '\');';
+            } else if( this._field_tabs.selected == 'customer' ) {
+                return 'M.ciniki_timetracker_main.entries.open(\'M.ciniki_timetracker_main.menu.open();\',\'customer\',\'' + (d.name != null ? d.name : '*') + '\',\'' + this.data.columns[j].start_dt + '\',\'' + this.data.columns[j].end_dt + '\');';
+            }
+//            return 'M.ciniki_timetracker_main.entries.open(\'M.ciniki_timetracker_main.menu.open();\',\'' + (d.type != null ? d.type : '*') + '\',\'' + (d.project != null ? d.project : '*') + '\',\'' + (d.module != null ? d.module : '*') + '\',\'' + (d.customer != null ? d.customer : '*') + '\',\'' + this.data.columns[j].start_dt + '\',\'' + this.data.columns[j].end_dt + '\');';
         }
     }
 /*    this.menu.footerValue = function(s, i, d) {
@@ -272,9 +281,10 @@ function ciniki_timetracker_main() {
     //
     this.entries = new M.panel('Entries', 'ciniki_timetracker_main', 'entries', 'mc', 'full', 'sectioned', 'ciniki.timetracker.main.entries');
     this.entries.data = null;
-    this.entries.project_id = 0;
+    this.entries.entrytype = '';
+    this.entries.project = '';
     this.entries.module = '';
-    this.entries.customer_id = 0;
+    this.entries.customer = '';
     this.entries.start_dt = '';
     this.entries.end_dt = '';
     this.entries.nplist = [];
@@ -290,13 +300,27 @@ function ciniki_timetracker_main() {
     this.entries.rowFn = function(s, i, d) {
         return 'M.startApp(\'ciniki.timetracker.tracker\', null, \'M.ciniki_timetracker_main.entries.open();\', \'mc\', {\'entry_id\':' + d.id + '});';
     }
-    this.entries.open = function(cb, pid, module, cid, start_dt, end_dt) {
-        if( pid != null ) { this.project_id = pid; }
-        if( module != null ) { this.module = module; }
-        if( cid != null ) { this.customer_id = cid; }
+    this.entries.open = function(cb, field, value, start_dt, end_dt) {
+        if( field != null && value != null ) {
+            this.entrytype = '*';
+            this.project = '*';
+            this.module = '*';
+            this.customer = '*';
+            this[field] = value;
+            console.log(field);
+            console.log(value);
+        }
         if( start_dt != null ) { this.start_dt = start_dt; }
         if( end_dt != null ) { this.end_dt = end_dt; }
-        M.api.getJSONCb('ciniki.timetracker.entryList', {'tnid':M.curTenantID, 'project_id':this.project_id, 'module':this.module, 'customer_id':this.customer_id, 'start_dt':this.start_dt, 'end_dt':this.end_dt}, function(rsp) {
+        var args = {'tnid':M.curTenantID, 
+            'start_dt':this.start_dt, 
+            'end_dt':this.end_dt,
+            'type':this.entrytype,
+            'project':this.project,
+            'module':this.module,
+            'customer':this.customer,
+            }; 
+        M.api.getJSONCb('ciniki.timetracker.entryList', args, function(rsp) {
             if( rsp.stat != 'ok' ) {
                 M.api.err(rsp);
                 return false;

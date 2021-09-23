@@ -74,8 +74,7 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
         }
     } elseif( is_string($args['end_dt']) ) {
         $args['end_dt'] = new DateTime($args['end_dt'] . ' 23:59:59', new DateTimezone($intl_timezone));
-        $args['end_dt']->setTimezone(new DateTimezone('UTC'));
-    }
+        $args['end_dt']->setTimezone(new DateTimezone('UTC')); }
     // 
     // Make sure weekly reports ends on a Sunday
     //
