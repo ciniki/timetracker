@@ -21,8 +21,11 @@ function ciniki_timetracker_entryList($ciniki) {
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'project_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Project'),
+        'type'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Type'),
+        'project'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Project'),
+        'task'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Task'),
         'module'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Module'),
-        'customer_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Customer'),
+        'customer'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Customer'),
         'start_dt'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Start'),
         'end_dt'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'End'),
         ));
@@ -55,34 +58,33 @@ function ciniki_timetracker_entryList($ciniki) {
     //
     $strsql = "SELECT entries.id, "
         . "entries.project_id, "
-        . "IFNULL(projects.name, '') AS project_name, "
+        . "entries.type, "
+        . "entries.project, "
         . "entries.module, "
-        . "entries.customer_id, "
-        . "IFNULL(customers.display_name, '') AS display_name, "
+        . "entries.task, "
+        . "entries.customer, "
         . "entries.start_dt, "
         . "entries.end_dt, "
         . "entries.start_dt AS start_display, "
         . "entries.end_dt AS end_display, "
         . "entries.notes "
         . "FROM ciniki_timetracker_entries AS entries "
-        . "LEFT JOIN ciniki_timetracker_projects AS projects ON ("
-            . "entries.project_id = projects.id "
-            . "AND projects.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-            . ") "
-        . "LEFT JOIN ciniki_customers AS customers ON ("
-            . "entries.customer_id = customers.id "
-            . "AND customers.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-            . ") "
         . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "";
-    if( isset($args['project_id']) && $args['project_id'] != '*' ) {
-        $strsql .= "AND entries.project_id = '" . ciniki_core_dbQuote($ciniki, $args['project_id']) . "' ";
+    if( isset($args['type']) && $args['type'] != '*' ) {
+        $strsql .= "AND entries.type = '" . ciniki_core_dbQuote($ciniki, $args['type']) . "' ";
+    }
+    if( isset($args['project']) && $args['project'] != '*' ) {
+        $strsql .= "AND entries.project = '" . ciniki_core_dbQuote($ciniki, $args['project']) . "' ";
+    }
+    if( isset($args['task']) && $args['task'] != '*' ) {
+        $strsql .= "AND entries.task = '" . ciniki_core_dbQuote($ciniki, $args['task']) . "' ";
     }
     if( isset($args['module']) && $args['module'] != '*' ) {
         $strsql .= "AND entries.module = '" . ciniki_core_dbQuote($ciniki, $args['module']) . "' ";
     }
-    if( isset($args['customer_id']) && $args['customer_id'] != '*' ) {
-        $strsql .= "AND entries.customer_id = '" . ciniki_core_dbQuote($ciniki, $args['customer_id']) . "' ";
+    if( isset($args['customer']) && $args['customer'] != '*' ) {
+        $strsql .= "AND entries.customer = '" . ciniki_core_dbQuote($ciniki, $args['customer']) . "' ";
     }
     if( isset($args['start_dt']) && $args['start_dt'] != '' ) {
         $strsql .= "AND entries.start_dt >= '" . ciniki_core_dbQuote($ciniki, $args['start_dt']) . "' ";
@@ -95,7 +97,7 @@ function ciniki_timetracker_entryList($ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'entries', 'fname'=>'id', 
-            'fields'=>array('id', 'project_id', 'project_name', 'module', 'customer_id', 'display_name', 'start_dt', 'end_dt', 
+            'fields'=>array('id', 'type', 'project', 'task', 'module', 'customer', 'start_dt', 'end_dt', 
                 'start_display', 'end_display', 'notes'),
             'utctotz'=>array(
                 'start_display'=>array('timezone'=>$intl_timezone, 'format'=>'D j, Y - g:i A'),

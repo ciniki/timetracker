@@ -60,9 +60,11 @@ function ciniki_timetracker_entryGet($ciniki) {
     //
     if( $args['entry_id'] == 0 ) {
         $entry = array('id'=>0,
-            'project_id'=>'',
+            'type'=>'',
+            'project'=>'',
+            'task'=>'',
             'module'=>'',
-            'customer_id'=>0,
+            'customer'=>0,
             'start_dt'=>'',
             'end_dt'=>'',
             'notes'=>'',
@@ -74,9 +76,11 @@ function ciniki_timetracker_entryGet($ciniki) {
     //
     else {
         $strsql = "SELECT ciniki_timetracker_entries.id, "
-            . "ciniki_timetracker_entries.project_id, "
+            . "ciniki_timetracker_entries.type, "
+            . "ciniki_timetracker_entries.project, "
+            . "ciniki_timetracker_entries.task, "
             . "ciniki_timetracker_entries.module, "
-            . "ciniki_timetracker_entries.customer_id, "
+            . "ciniki_timetracker_entries.customer, "
             . "ciniki_timetracker_entries.start_dt, "
             . "ciniki_timetracker_entries.end_dt, "
             . "ciniki_timetracker_entries.notes "
@@ -87,7 +91,7 @@ function ciniki_timetracker_entryGet($ciniki) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
         $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
             array('container'=>'entries', 'fname'=>'id', 
-                'fields'=>array('project_id', 'module', 'customer_id', 'start_dt', 'end_dt', 'notes'),
+                'fields'=>array('type', 'project', 'task', 'module', 'customer', 'start_dt', 'end_dt', 'notes'),
                 'utctotz'=>array(
                     'start_dt'=>array('timezone'=>$intl_timezone, 'format'=>$datetime_format),
                     'end_dt'=>array('timezone'=>$intl_timezone, 'format'=>$datetime_format),
@@ -107,7 +111,7 @@ function ciniki_timetracker_entryGet($ciniki) {
     //
     // Load customer details
     //
-    if( ciniki_core_checkModuleFlags($ciniki, 'ciniki.timetracker', 0x02) && $entry['customer_id'] > 0 ) {
+/*    if( ciniki_core_checkModuleFlags($ciniki, 'ciniki.timetracker', 0x02) && $entry['customer_id'] > 0 ) {
         ciniki_core_loadMethod($ciniki, 'ciniki', 'customers', 'hooks', 'customerDetails2');
         $rc = ciniki_customers_hooks_customerDetails2($ciniki, $args['tnid'], 
             array('customer_id'=>$entry['customer_id'], 'phone'=>'yes', 'emails'=>'yes', 'address'=>'yes')
@@ -117,12 +121,12 @@ function ciniki_timetracker_entryGet($ciniki) {
         }
         $rsp['entry']['customer'] = $rc['customer'];
         $rsp['entry']['customer_details'] = $rc['details'];
-    }    
+    }     */
 
     //
     // Get the list of projects
     //
-    $strsql = "SELECT projects.id, "
+/*    $strsql = "SELECT projects.id, "
         . "projects.sequence, "
         . "projects.name, "
         . "projects.status, "
@@ -149,7 +153,7 @@ function ciniki_timetracker_entryGet($ciniki) {
         return $rc;
     }
     $rsp['projects'] = isset($rc['projects']) ? $rc['projects'] : array();
-
+*/
     return $rsp;
 }
 ?>

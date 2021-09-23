@@ -50,16 +50,16 @@ function ciniki_timetracker_entryFieldSearch($ciniki) {
     //
     // Reject if an unknown field
     //
-    if( $args['field'] != 'module' ) {
-        return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.26', 'msg'=>'Unvalid search field'));
-    }
     $strsql = "SELECT DISTINCT " . $args['field'] . " AS value "
         . "FROM ciniki_timetracker_entries "
         . "WHERE tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "AND (" . $args['field']  . " LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
             . "AND " . $args['field'] . " <> '' "
-            . ") "
-        . "ORDER BY " . $args['field'] . " ";
+            . ") ";
+    if( $args['start_needle'] == '' ) {
+        $strsql .= "AND date_added > DATE_SUB(NOW(), INTERVAL 6 MONTH) ";
+    }
+    $strsql .= "ORDER BY " . $args['field'] . " ";
     if( isset($args['limit']) && $args['limit'] != '' && $args['limit'] > 0 ) {
         $strsql .= "LIMIT " . ciniki_core_dbQuote($ciniki, $args['limit']) . " ";
     } else {

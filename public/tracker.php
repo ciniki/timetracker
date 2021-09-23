@@ -22,7 +22,11 @@ function ciniki_timetracker_tracker($ciniki) {
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
         'action'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Action'),
         'project_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Project'),
+        'type'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Type'),
+        'project'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Project'),
+        'task'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Task'),
         'module'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Module'),
+        'customer'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Customer'),
         'customer_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Customer'),
         'notes'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Notes'),
         'entry_id'=>array('required'=>'no', 'blank'=>'no', 'name'=>'Entry'),
@@ -67,9 +71,13 @@ function ciniki_timetracker_tracker($ciniki) {
     if( isset($args['action']) && $args['action'] == 'start' ) {
         $dt = new DateTime('now', new DateTimezone('UTC'));
         $entry = array(
-            'project_id' => $args['project_id'],
+//            'project_id' => $args['project_id'],
+            'type' => isset($args['type']) ? $args['type'] : '',
+            'project' => isset($args['project']) ? $args['project'] : '',
+            'task' => isset($args['task']) ? $args['task'] : '',
             'module' => isset($args['module']) ? $args['module'] : '',
-            'customer_id' => isset($args['customer_id']) ? $args['customer_id'] : 0,
+            'customer' => isset($args['customer']) ? $args['customer'] : '',
+//            'customer_id' => isset($args['customer_id']) ? $args['customer_id'] : 0,
             'user_id' => $ciniki['session']['user']['id'],
             'start_dt' => $dt->format('Y-m-d H:i:s'),
             'end_dt' => '',
@@ -108,28 +116,32 @@ function ciniki_timetracker_tracker($ciniki) {
     $start_dt = new DateTime('now', new DateTimezone($intl_timezone));
     $start_dt->sub(new DateInterval('P31D'));
     $strsql = "SELECT entries.id, "
+        . "entries.type, "
+        . "entries.project, "
+        . "entries.task, "
         . "entries.project_id, "
-        . "projects.name AS project_name, "
+//        . "projects.name AS project_name, "
         . "entries.module, "
         . "entries.start_dt AS start_day, "
         . "entries.start_dt AS start_dt_display, "
         . "entries.end_dt AS end_dt_display, "
-        . "entries.customer_id, "
-        . "IFNULL(customers.display_name, '') AS display_name, "
+        . "entries.customer, "
+//        . "entries.customer_id, "
+//        . "IFNULL(customers.display_name, '') AS display_name, "
         . "IF( entries.end_dt <> '0000-00-00 00:00:00', "
             . "(UNIX_TIMESTAMP(entries.end_dt)-UNIX_TIMESTAMP(entries.start_dt)), "
             . "(UNIX_TIMESTAMP(UTC_TIMESTAMP())-UNIX_TIMESTAMP(entries.start_dt)) "
             . ") AS length, "
         . "entries.notes "
         . "FROM ciniki_timetracker_entries AS entries "
-        . "LEFT JOIN ciniki_timetracker_projects AS projects ON ("
+/*        . "LEFT JOIN ciniki_timetracker_projects AS projects ON ("
             . "entries.project_id = projects.id "
             . "AND projects.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
             . ") "
         . "LEFT JOIN ciniki_customers AS customers ON ("
             . "entries.customer_id = customers.id "
             . "AND customers.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-            . ") "
+            . ") " */
         . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "AND entries.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
         . "AND start_dt > '" . ciniki_core_dbQuote($ciniki, $start_dt->format('Y-m-d')) . "' "
@@ -139,7 +151,7 @@ function ciniki_timetracker_tracker($ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'entries', 'fname'=>'id', 
-            'fields'=>array('id', 'project_id', 'project_name', 'module', 'customer_id', 'display_name', 'start_day', 'start_dt_display', 'end_dt_display', 'length', 'notes'),
+            'fields'=>array('id', 'type', 'project', 'task', 'module', 'customer', 'start_day', 'start_dt_display', 'end_dt_display', 'length', 'notes'),
             'utctotz'=>array(
                 'start_day'=>array('timezone'=>$intl_timezone, 'format'=>'M d'),
                 'start_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>'M j - ' . $time_format),
@@ -162,10 +174,10 @@ function ciniki_timetracker_tracker($ciniki) {
         $entry_ids = array();
         foreach($entries as $iid => $entry) {
             if( $entry['start_day'] == $start_day ) {
-                if( !isset($project_times[$entry['project_id']]) ) {
-                    $project_times[$entry['project_id']] = 0;
+                if( !isset($type_times[$entry['type']]) ) {
+                    $type_times[$entry['type']] = 0;
                 }
-                $project_times[$entry['project_id']] += $entry['length'];
+                $type_times[$entry['type']] += $entry['length'];
             }
             if( $entry['length'] > 0 ) {
                 $minutes = (int)($entry['length']/60);
@@ -183,7 +195,43 @@ function ciniki_timetracker_tracker($ciniki) {
     //
     // Get the list of projects
     //
-    $strsql = "SELECT projects.id, "
+    $strsql = "SELECT DISTINCT entries.type, "
+        . "IFNULL(e2.id, 0) AS entry_id "
+        . "FROM ciniki_timetracker_entries AS entries "
+        . "LEFT JOIN ciniki_timetracker_entries AS e2 ON ("
+            . "entries.type = e2.type "
+            . "AND e2.end_dt = '0000-00-00 00:00:00' "
+            . "AND e2.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
+            . "AND e2.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+            . ") "
+        . "WHERE entries.start_dt > DATE_SUB(NOW(), INTERVAL 3 MONTH) "
+        . "AND entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "ORDER BY entries.type "
+        . "";
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
+    $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
+        array('container'=>'types', 'fname'=>'type', 
+            'fields'=>array('type', 'entry_id')),
+        ));
+    if( $rc['stat'] != 'ok' ) {
+        return $rc;
+    }
+    $today_length = 0;
+    $types = isset($rc['types']) ? $rc['types'] : array();
+    foreach($types as $iid => $t) {
+        if( isset($type_times[$t['type']]) ) {
+            $length = $type_times[$t['type']];
+            $types[$iid]['today_length'] = $length;
+            $today_length += $length;
+            $minutes = (int)($length/60);
+            $hours = (int)($minutes/60);
+            $hour_minutes = ($minutes%60);
+            $types[$iid]['today_length_display'] = $hours . ':' . sprintf("%02d", $hour_minutes);
+
+        }
+    }
+        
+/*    $strsql = "SELECT projects.id, "
         . "projects.name, "
         . "projects.status, "
         . "IFNULL(entries.id, 0) AS entry_id, "
@@ -233,12 +281,12 @@ function ciniki_timetracker_tracker($ciniki) {
         $projects = array();
         $project_ids = array();
     }
-
+*/
     $minutes = (int)($today_length/60);
     $hours = (int)($minutes/60);
     $hour_minutes = ($minutes%60);
     $today_length_display = $hours . ':' . sprintf("%02d", $hour_minutes);
 
-    return array('stat'=>'ok', 'projects'=>$projects, 'nplist'=>$project_ids, 'entries'=>$entries, 'today_length_display'=>$today_length_display);
+    return array('stat'=>'ok', 'types'=>$types, 'entries'=>$entries, 'today_length_display'=>$today_length_display);
 }
 ?>

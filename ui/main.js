@@ -259,7 +259,7 @@ function ciniki_timetracker_main() {
     //
     // The panel to list entries
     //
-    this.entries = new M.panel('Entries', 'ciniki_timetracker_main', 'entries', 'mc', 'large', 'sectioned', 'ciniki.timetracker.main.entries');
+    this.entries = new M.panel('Entries', 'ciniki_timetracker_main', 'entries', 'mc', 'full', 'sectioned', 'ciniki.timetracker.main.entries');
     this.entries.data = null;
     this.entries.project_id = 0;
     this.entries.module = '';
@@ -320,21 +320,21 @@ function ciniki_timetracker_main() {
         }
 
         if( M.modFlagOn('ciniki.timetracker', 0x03) ) {
-            this.entries.sections.entries.num_cols = 6;
-            this.entries.sections.entries.headerValues = ['Project', 'Module', 'Customer', 'Start', 'End', 'Notes'];
-            this.entries.sections.entries.dataMaps = ['project_name', 'module', 'display_name', 'start_display', 'end_display', 'notes'];
+            this.entries.sections.entries.num_cols = 7;
+            this.entries.sections.entries.headerValues = ['Type', 'Project', 'Task', 'Module', 'Customer', 'Start', 'End', 'Notes'];
+            this.entries.sections.entries.dataMaps = ['type', 'project', 'task', 'module', 'customer', 'start_display', 'end_display', 'notes'];
         } else if( M.modFlagOn('ciniki.timetracker', 0x01) ) {
-            this.entries.sections.entries.num_cols = 5;
-            this.entries.sections.entries.headerValues = ['Project', 'Module', 'Start', 'End', 'Notes'];
-            this.entries.sections.entries.dataMaps = ['project_name', 'module', 'start_display', 'end_display', 'notes'];
+            this.entries.sections.entries.num_cols = 6;
+            this.entries.sections.entries.headerValues = ['Type', 'Project', 'Task', 'Module', 'Start', 'End', 'Notes'];
+            this.entries.sections.entries.dataMaps = ['type', 'project', 'task', 'module', 'start_display', 'end_display', 'notes'];
         } else if( M.modFlagOn('ciniki.timetracker', 0x02) ) {
             this.entries.sections.entries.num_cols = 5;
-            this.entries.sections.entries.headerValues = ['Project', 'Customer', 'Start', 'End', 'Notes'];
-            this.entries.sections.entries.dataMaps = ['project_name', 'display_name', 'start_display', 'end_display', 'notes'];
+            this.entries.sections.entries.headerValues = ['Type', 'Project', 'Task', 'Customer', 'Start', 'End', 'Notes'];
+            this.entries.sections.entries.dataMaps = ['type', 'project', 'task', 'customer', 'start_display', 'end_display', 'notes'];
         } else {
-            this.entries.sections.entries.num_cols = 4;
-            this.entries.sections.entries.headerValues = ['Project', 'Start', 'End', 'Notes'];
-            this.entries.sections.entries.dataMaps = ['project_name', 'start_display', 'end_display', 'notes'];
+            this.entries.sections.entries.num_cols = 5;
+            this.entries.sections.entries.headerValues = ['Type', 'Project', 'Task', 'Start', 'End', 'Notes'];
+            this.entries.sections.entries.dataMaps = ['type', 'project', 'task', 'start_display', 'end_display', 'notes'];
         }
 
         //
