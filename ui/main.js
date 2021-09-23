@@ -13,7 +13,13 @@ function ciniki_timetracker_main() {
         'weekly':{'label':'Weekly', 'fn':'M.ciniki_timetracker_main.menu.switchTab("weekly");'},
         'monthly':{'label':'Monthly', 'fn':'M.ciniki_timetracker_main.menu.switchTab("monthly");'},
 //        'entries':{'label':'Entries', 'fn':'M.ciniki_timetracker_main.menu.switchTab("entries");'},
-        'projects':{'label':'Projects', 'fn':'M.ciniki_timetracker_main.menu.switchTab("projects");'},
+//        'projects':{'label':'Projects', 'fn':'M.ciniki_timetracker_main.menu.switchTab("projects");'},
+        }};
+    this.menu._field_tabs = {'label':'', 'type':'paneltabs', 'selected':'type', 'tabs':{
+        'type':{'label':'Type', 'fn':'M.ciniki_timetracker_main.menu.switchField("type");'},
+        'project':{'label':'Project', 'fn':'M.ciniki_timetracker_main.menu.switchField("project");'},
+        'module':{'label':'Module', 'fn':'M.ciniki_timetracker_main.menu.switchField("module");'},
+        'customer':{'label':'Customer', 'fn':'M.ciniki_timetracker_main.menu.switchField("customer");'},
         }};
     this.menu.start_dt = '';
     this.menu.end_dt = '';
@@ -73,6 +79,10 @@ function ciniki_timetracker_main() {
         this._tabs.selected = t;
         this.open();
     }
+    this.menu.switchField = function(t) {
+        this._field_tabs.selected = t;
+        this.open();
+    }
     this.menu.open = function(cb) {
         if( cb != null ) { this.cb = cb; }
         if( this._tabs.selected == 'projects' ) {
@@ -80,7 +90,7 @@ function ciniki_timetracker_main() {
         } else if( this._tabs.selected == 'entries' ) {
             M.api.getJSONCb('ciniki.timetracker.entries', {'tnid':M.curTenantID}, this.openFinish);
         } else {
-            M.api.getJSONCb('ciniki.timetracker.projectStats', {'tnid':M.curTenantID, 'report':this._tabs.selected, 'start_dt':this.start_dt, 'end_dt':this.end_dt}, this.openFinish);
+            M.api.getJSONCb('ciniki.timetracker.fieldStats', {'tnid':M.curTenantID, 'report':this._tabs.selected, 'field':this._field_tabs.selected, 'start_dt':this.start_dt, 'end_dt':this.end_dt}, this.openFinish);
         }
     }
     this.menu.openFinish = function(rsp) {
@@ -91,6 +101,7 @@ function ciniki_timetracker_main() {
         var p = M.ciniki_timetracker_main.menu;
         p.data = rsp;
         p.sections = {
+            '_field_tabs':p._field_tabs,
             '_tabs':p._tabs,
             };
         if( p._tabs.selected == 'daily' || p._tabs.selected == 'weekly' || p._tabs.selected == 'monthly' ) {
@@ -108,7 +119,7 @@ function ciniki_timetracker_main() {
             for(var i in rsp.users) {
                 var footerValues = [];
                 for(var j in rsp.columns) {
-                    footerValues[j] = rsp.users[i].projects.total[rsp.columns[j].field];
+                    footerValues[j] = rsp.users[i].values.total[rsp.columns[j].field];
                     if( footerValues[j] == null ) {
                         footerValues[j] = '';
                     }
@@ -120,8 +131,8 @@ function ciniki_timetracker_main() {
                     'noData':'Nothing tracker',
                     'footerValues':footerValues,
                 };
-                delete rsp.users[i].projects.total;
-                p.data['user_' + rsp.users[i].id] = rsp.users[i].projects;
+                delete rsp.users[i].values.total;
+                p.data['user_' + rsp.users[i].id] = rsp.users[i].values;
             }
 //        } else if( p._tabs.selected == 'entries' ) {
 //            p.sections['

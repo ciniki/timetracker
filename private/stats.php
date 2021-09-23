@@ -138,6 +138,11 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
         'field' => 'total_display',
         );
 
+    $report_field = 'type';
+    if( isset($args['field']) && $args['field'] != '' ) {
+        $report_field = $args['field'];
+    }
+
     //
     // Get the list of active projects for the totals columns
     //
@@ -167,9 +172,18 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
     $strsql = "SELECT entries.id, "
         . "entries.user_id, "
         . "users.display_name, "
-        . "entries.project_id, "
-        . "projects.name AS project_name, "
-        . "entries.start_dt AS year, "
+        . "entries.project_id, ";
+    if( $report_field == 'type' ) {
+        $strsql .= "entries.type AS field_value, ";
+    } elseif( $report_field == 'project' ) {
+        $strsql .= "entries.project AS field_value, ";
+    } elseif( $report_field == 'module' ) {
+        $strsql .= "entries.module AS field_value, ";
+    } elseif( $report_field == 'customer' ) {
+        $strsql .= "entries.customer AS field_value, ";
+    }
+//        . "projects.name AS project_name, "
+    $strsql .= "entries.start_dt AS year, "
         . "entries.start_dt AS month, "
         . "entries.start_dt AS day, "
         . "entries.start_dt AS week, "
@@ -184,19 +198,19 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
         . "LEFT JOIN ciniki_users AS users ON ("
             . "entries.user_id = users.id "
             . ") "
-        . "LEFT JOIN ciniki_timetracker_projects AS projects ON ("
+/*        . "LEFT JOIN ciniki_timetracker_projects AS projects ON ("
             . "entries.project_id = projects.id "
             . "AND projects.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' "
-            . ") "
+            . ") " */
         . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $tnid) . "' "
         . "AND entries.start_dt >= '" . ciniki_core_dbQuote($ciniki, $args['start_dt']->format('Y-m-d H:i:s')) . "' "
         . "AND entries.end_dt <= '" . ciniki_core_dbQuote($ciniki, $args['end_dt']->format('Y-m-d H:i:s')) . "' "
-        . "ORDER BY users.display_name, projects.sequence, projects.name, entries.start_dt "
+        . "ORDER BY users.display_name, field_value, entries.start_dt "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'users', 'fname'=>'user_id', 'fields'=>array('id'=>'user_id', 'name'=>'display_name')),
-        array('container'=>'projects', 'fname'=>'project_id', 'fields'=>array('id'=>'project_id', 'name'=>'project_name')),
+        array('container'=>'values', 'fname'=>'field_value', 'fields'=>array('name'=>'field_value')),
         array('container'=>'entries', 'fname'=>'id', 
             'fields'=>array('id', 'project_id', 'year', 'month', 'day', 'week', 'start_dt', 'end_dt', 'length', 'notes'),
             'utctotz'=>array(
@@ -221,8 +235,8 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
             'id' => 0,
             'name' => 'Totals',
             );
-        foreach($user['projects'] as $pid => $project) {
-            foreach($project['entries'] as $eid => $entry) {
+        foreach($user['values'] as $fid => $field_value) {
+            foreach($field_value['entries'] as $eid => $entry) {
                 if( $args['report'] == 'daily' ) {
                     $field = $entry['year'] . '-' . $entry['month'] . '-' . $entry['day'];
                 } elseif( $args['report'] == 'weekly' ) {
@@ -234,18 +248,17 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
                 //
                 // Add to the user/project table
                 //
-                if( !isset($users[$uid]['projects'][$pid][$field]) ) {
-                    $users[$uid]['projects'][$pid][$field] = 0;
+                if( !isset($users[$uid]['values'][$fid][$field]) ) {
+                    $users[$uid]['values'][$fid][$field] = 0;
                 }
-                if( !isset($users[$uid]['projects'][$pid]['total']) ) {
-                    $users[$uid]['projects'][$pid]['total'] = 0;
+                if( !isset($users[$uid]['values'][$fid]['total']) ) {
+                    $users[$uid]['values'][$fid]['total'] = 0;
                 }
         
-//                error_log($uid . ':' . $pid . '--' . $entry['length'] . ' [' . $entry['start_dt'] . ']');
-                $users[$uid]['projects'][$pid][$field] += $entry['length'];
-                $users[$uid]['projects'][$pid][$field . '_display'] = sprintf("%.01f", $users[$uid]['projects'][$pid][$field]/3600);
-                $users[$uid]['projects'][$pid]['total'] += $entry['length'];
-                $users[$uid]['projects'][$pid]['total_display'] = sprintf("%.01f", $users[$uid]['projects'][$pid]['total']/3600);
+                $users[$uid]['values'][$fid][$field] += $entry['length'];
+                $users[$uid]['values'][$fid][$field . '_display'] = sprintf("%.01f", $users[$uid]['values'][$fid][$field]/3600);
+                $users[$uid]['values'][$fid]['total'] += $entry['length'];
+                $users[$uid]['values'][$fid]['total_display'] = sprintf("%.01f", $users[$uid]['values'][$fid]['total']/3600);
 
                 //
                 // Add the to the users daily totals
@@ -261,7 +274,7 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
                 $totals['total'] += $entry['length'];
                 $totals['total_display'] = sprintf("%.01f", $totals['total']/3600);
 
-                //
+/*                //
                 // Add to the projects total table that will be added at the end
                 //
                 if( !isset($projects[$project['id']][$field]) ) {
@@ -287,21 +300,21 @@ function ciniki_timetracker_stats($ciniki, $tnid, $args) {
                 $projects['total'][$field] += $entry['length'];
                 $projects['total'][$field . '_display'] = sprintf("%.01f", $projects['total'][$field]/3600);
                 $projects['total']['total'] += $entry['length'];
-                $projects['total']['total_display'] = sprintf("%.01f", $projects['total']['total']/3600);
+                $projects['total']['total_display'] = sprintf("%.01f", $projects['total']['total']/3600); */
             }
-            unset($users[$uid]['projects'][$pid]['entries']);
+            unset($users[$uid]['values'][$fid]['entries']);
         }
-        $users[$uid]['projects']['total'] = $totals;
+        $users[$uid]['values']['total'] = $totals;
     }
 
-    $totals = array_pop($projects);
+/*    $totals = array_pop($projects);
     $projects = array_values($projects);
     $projects['total'] = $totals;
     $users['totals'] = array(
         'id' => '0',
         'name' => 'Totals',
-        'projects' => $projects,
-        );
+        'values' => $values,
+        ); */
    
     $args['start_dt']->setTimezone(new DateTimezone($intl_timezone));
     $args['end_dt']->setTimezone(new DateTimezone($intl_timezone));

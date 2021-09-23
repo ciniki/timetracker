@@ -100,8 +100,8 @@ function ciniki_timetracker_entryList($ciniki) {
             'fields'=>array('id', 'type', 'project', 'task', 'module', 'customer', 'start_dt', 'end_dt', 
                 'start_display', 'end_display', 'notes'),
             'utctotz'=>array(
-                'start_display'=>array('timezone'=>$intl_timezone, 'format'=>'D j, Y - g:i A'),
-                'end_display'=>array('timezone'=>$intl_timezone, 'format'=>'D j, Y - g:i A'),
+                'start_display'=>array('timezone'=>$intl_timezone, 'format'=>'D M j, Y - g:i A'),
+                'end_display'=>array('timezone'=>$intl_timezone, 'format'=>'D M j, Y - g:i A'),
                 ),
             ),
         ));
