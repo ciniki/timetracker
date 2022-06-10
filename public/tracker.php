@@ -114,7 +114,7 @@ function ciniki_timetracker_tracker($ciniki) {
     // Get the list of recent entries in the last 30 days
     //
     $start_dt = new DateTime('now', new DateTimezone($intl_timezone));
-    $start_dt->sub(new DateInterval('P31D'));
+    $start_dt->sub(new DateInterval('P90D'));
     $strsql = "SELECT entries.id, "
         . "entries.type, "
         . "entries.project, "
