@@ -114,7 +114,7 @@ function ciniki_timetracker_tracker($ciniki) {
     // Get the list of recent entries in the last 30 days
     //
     $start_dt = new DateTime('now', new DateTimezone($intl_timezone));
-    $start_dt->sub(new DateInterval('P90D'));
+    $start_dt->sub(new DateInterval('P31D'));
     $strsql = "SELECT entries.id, "
         . "entries.type, "
         . "entries.project, "
@@ -146,7 +146,7 @@ function ciniki_timetracker_tracker($ciniki) {
         . "AND entries.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
         . "AND start_dt > '" . ciniki_core_dbQuote($ciniki, $start_dt->format('Y-m-d')) . "' "
         . "ORDER BY start_dt DESC "
-        . "LIMIT 200 "
+        . "LIMIT 500 "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
