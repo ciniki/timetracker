@@ -355,7 +355,7 @@ function ciniki_timetracker_main() {
         }
 
         if( M.modFlagOn('ciniki.timetracker', 0x03) ) {
-            this.entries.sections.entries.num_cols = 7;
+            this.entries.sections.entries.num_cols = 8;
             this.entries.sections.entries.headerValues = ['Type', 'Project', 'Task', 'Module', 'Customer', 'Start', 'End', 'Notes'];
             this.entries.sections.entries.dataMaps = ['type', 'project', 'task', 'module', 'customer', 'start_display', 'end_display', 'notes'];
         } else if( M.modFlagOn('ciniki.timetracker', 0x01) ) {
