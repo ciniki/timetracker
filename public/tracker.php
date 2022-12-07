@@ -114,7 +114,7 @@ function ciniki_timetracker_tracker($ciniki) {
     // Get the list of recent entries in the last 30 days
     //
     $start_dt = new DateTime('now', new DateTimezone($intl_timezone));
-    $start_dt->sub(new DateInterval('P31D'));
+    $start_dt->sub(new DateInterval('P90D'));
     $strsql = "SELECT entries.id, "
         . "entries.type, "
         . "entries.project, "
@@ -227,9 +227,28 @@ function ciniki_timetracker_tracker($ciniki) {
             $hours = (int)($minutes/60);
             $hour_minutes = ($minutes%60);
             $types[$iid]['today_length_display'] = $hours . ':' . sprintf("%02d", $hour_minutes);
-
         }
     }
+
+    //
+    // Get the list of recent type, module, customer, project
+    //
+/*    $strsql = "SELECT DISTINCT entries.type, "
+        . "entries.project, "
+        . "entries.module, "
+        . "entries.customer "
+        . "FROM ciniki_timetracker_entries AS entries "
+        . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "AND entries.start_dt > DATE_SUB(NOW(), INTERVAL 6 MONTH) "
+        . "GROUP BY type, project, module, customer "
+        . "ORDER BY customer, project, module, type "
+        . "";
+    $rc = ciniki_core_dbHashQuery($ciniki, $strsql, 'ciniki.timetracker', 'item');
+    if( $rc['stat'] != 'ok' ) {
+        return array('stat'=>'fail', 'err'=>array('code'=>'ciniki.timetracker.27', 'msg'=>'Unable to load item', 'err'=>$rc['err']));
+    }
+    $projects = isset($rc['rows']) ? $rc['rows'] : array();
+    error_log(print_r($projects,true)); */
         
 /*    $strsql = "SELECT projects.id, "
         . "projects.name, "
@@ -287,6 +306,6 @@ function ciniki_timetracker_tracker($ciniki) {
     $hour_minutes = ($minutes%60);
     $today_length_display = $hours . ':' . sprintf("%02d", $hour_minutes);
 
-    return array('stat'=>'ok', 'types'=>$types, 'entries'=>$entries, 'today_length_display'=>$today_length_display);
+    return array('stat'=>'ok', 'types'=>$types, 'entries'=>$entries, 'projects'=>$projects, 'today_length_display'=>$today_length_display);
 }
 ?>
