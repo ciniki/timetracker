@@ -19,7 +19,7 @@ function ciniki_timetracker_tracker() {
         'entries':{'label':'Recent', 'type':'simplegrid', 'num_cols':3,
             'cellClasses':['multiline', 'multiline', ''],
             'dataMaps':['name', 'time', 'length'],
-            'limit':50,
+//            'limit':50,
             },
     }
 
