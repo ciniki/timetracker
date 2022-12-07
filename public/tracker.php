@@ -306,6 +306,6 @@ function ciniki_timetracker_tracker($ciniki) {
     $hour_minutes = ($minutes%60);
     $today_length_display = $hours . ':' . sprintf("%02d", $hour_minutes);
 
-    return array('stat'=>'ok', 'types'=>$types, 'entries'=>$entries, 'projects'=>$projects, 'today_length_display'=>$today_length_display);
+    return array('stat'=>'ok', 'types'=>$types, 'entries'=>$entries, 'today_length_display'=>$today_length_display);
 }
 ?>
