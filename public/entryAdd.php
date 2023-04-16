@@ -20,7 +20,7 @@ function ciniki_timetracker_entryAdd(&$ciniki) {
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'prepareArgs');
     $rc = ciniki_core_prepareArgs($ciniki, 'no', array(
         'tnid'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Tenant'),
-        'user_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'User'),
+        'user_id'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'User'),
         'project_id'=>array('required'=>'yes', 'blank'=>'no', 'name'=>'Project'),
         'type'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Type'),
         'project'=>array('required'=>'no', 'blank'=>'yes', 'name'=>'Project'),
@@ -36,6 +36,10 @@ function ciniki_timetracker_entryAdd(&$ciniki) {
         return $rc;
     }
     $args = $rc['args'];
+
+    if( !isset($args['user_id']) || $args['user_id'] == '' ) {
+        $args['user_id'] = $ciniki['session']['user']['id'];
+    }
 
     //
     // Check access to tnid as owner
