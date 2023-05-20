@@ -146,7 +146,7 @@ function ciniki_timetracker_tracker($ciniki) {
         . "AND entries.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
         . "AND start_dt > '" . ciniki_core_dbQuote($ciniki, $start_dt->format('Y-m-d')) . "' "
         . "ORDER BY start_dt DESC "
-        . "LIMIT 500 "
+        . "LIMIT 250 "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
@@ -193,25 +193,37 @@ function ciniki_timetracker_tracker($ciniki) {
     }
 
     //
+    // Get the list of running entries
+    //
+    $strsql = "SELECT entries.id, "
+        . "entries.type "
+        . "FROM ciniki_timetracker_entries AS entries "
+        . "WHERE entries.end_dt = '0000-00-00 00:00:00' "
+        . "AND entries.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
+        . "AND entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "";
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryIDTree');
+    $rc = ciniki_core_dbHashQueryIDTree($ciniki, $strsql, 'ciniki.timetracker', array(
+        array('container'=>'types', 'fname'=>'type', 'fields'=>array('type', 'id')),
+        ));
+    if( $rc['stat'] != 'ok' ) {
+        return $rc;
+    }
+    $running = isset($rc['types']) ? $rc['types'] : array();
+
+    //
     // Get the list of projects
     //
     $strsql = "SELECT DISTINCT entries.type, "
-        . "IFNULL(e2.id, 0) AS entry_id "
+        . "0 as entry_id "
         . "FROM ciniki_timetracker_entries AS entries "
-        . "LEFT JOIN ciniki_timetracker_entries AS e2 ON ("
-            . "entries.type = e2.type "
-            . "AND e2.end_dt = '0000-00-00 00:00:00' "
-            . "AND e2.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
-            . "AND e2.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-            . ") "
-        . "WHERE entries.start_dt > DATE_SUB(NOW(), INTERVAL 3 MONTH) "
+        . "WHERE entries.start_dt > DATE_SUB(NOW(), INTERVAL 6 MONTH) "
         . "AND entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
         . "ORDER BY entries.type "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
-        array('container'=>'types', 'fname'=>'type', 
-            'fields'=>array('type', 'entry_id')),
+        array('container'=>'types', 'fname'=>'type', 'fields'=>array('type')),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
@@ -227,6 +239,9 @@ function ciniki_timetracker_tracker($ciniki) {
             $hours = (int)($minutes/60);
             $hour_minutes = ($minutes%60);
             $types[$iid]['today_length_display'] = $hours . ':' . sprintf("%02d", $hour_minutes);
+        }
+        if( isset($running[$t['type']]) ) {
+            $types[$iid]['entry_id'] = $running[$t['type']]['id'];
         }
     }
 

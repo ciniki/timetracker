@@ -38,5 +38,6 @@ create table ciniki_timetracker_entries (
     last_updated datetime not null,
     primary key (id),
     unique index (uuid),
+    index (start_dt),
     index sync (tnid, uuid, last_updated)
 ) ENGINE='InnoDB', COMMENT='v1.01';

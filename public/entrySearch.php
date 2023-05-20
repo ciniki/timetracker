@@ -40,37 +40,98 @@ function ciniki_timetracker_entrySearch($ciniki) {
     }
 
     //
-    // Get the list of entries
+    // Load the tenant settings
     //
-    $strsql = "SELECT ciniki_timetracker_entries.id, "
-        . "ciniki_timetracker_entries.project_id, "
-        . "ciniki_timetracker_entries.start_dt, "
-        . "ciniki_timetracker_entries.end_dt, "
-        . "ciniki_timetracker_entries.notes "
-        . "FROM ciniki_timetracker_entries "
-        . "WHERE ciniki_timetracker_entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
-        . "AND ("
-            . "name LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
-            . "OR name LIKE '% " . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
-        . ") "
-        . "";
-    if( isset($args['limit']) && is_numeric($args['limit']) && $args['limit'] > 0 ) {
-        $strsql .= "LIMIT " . ciniki_core_dbQuote($ciniki, $args['limit']) . " ";
-    } else {
-        $strsql .= "LIMIT 25 ";
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'tenants', 'private', 'intlSettings');
+    $rc = ciniki_tenants_intlSettings($ciniki, $args['tnid']);
+    if( $rc['stat'] != 'ok' ) {
+        return $rc;
     }
+    $intl_timezone = $rc['settings']['intl-default-timezone'];
+        
+    //
+    // Load the date format strings for the user
+    //
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'dateFormat');
+    $date_format = ciniki_users_dateFormat($ciniki, 'php');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'timeFormat');
+    $time_format = ciniki_users_timeFormat($ciniki, 'php');
+    ciniki_core_loadMethod($ciniki, 'ciniki', 'users', 'private', 'datetimeFormat');
+    $datetime_format = ciniki_users_datetimeFormat($ciniki, 'php');
+
+    //
+    // Search for entries
+    //
+    $strsql = "SELECT entries.id, "
+        . "entries.type, "
+        . "entries.project, "
+        . "entries.task, "
+        . "entries.project_id, "
+        . "entries.module, "
+        . "entries.start_dt AS start_day, "
+        . "entries.start_dt AS start_dt_display, "
+        . "entries.end_dt AS end_dt_display, "
+        . "entries.customer, "
+        . "IF( entries.end_dt <> '0000-00-00 00:00:00', "
+            . "(UNIX_TIMESTAMP(entries.end_dt)-UNIX_TIMESTAMP(entries.start_dt)), "
+            . "(UNIX_TIMESTAMP(UTC_TIMESTAMP())-UNIX_TIMESTAMP(entries.start_dt)) "
+            . ") AS length, "
+        . "entries.notes "
+        . "FROM ciniki_timetracker_entries AS entries "
+        . "WHERE entries.tnid = '" . ciniki_core_dbQuote($ciniki, $args['tnid']) . "' "
+        . "AND entries.user_id = '" . ciniki_core_dbQuote($ciniki, $ciniki['session']['user']['id']) . "' "
+        . "AND ("
+            . "type LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR type LIKE '% " . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR project LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR project LIKE '% " . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR task LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR task LIKE '% " . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR customer LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR customer LIKE '% " . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR notes LIKE '" . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+            . "OR notes LIKE '% " . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
+        . ") "
+        . "ORDER BY start_dt DESC "
+        . "LIMIT 50 "
+        . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
         array('container'=>'entries', 'fname'=>'id', 
-            'fields'=>array('id', 'project_id', 'start_dt', 'end_dt', 'notes')),
+            'fields'=>array('id', 'type', 'project', 'task', 'module', 'customer', 'start_day', 'start_dt_display', 'end_dt_display', 'length', 'notes'),
+            'utctotz'=>array(
+                'start_day'=>array('timezone'=>$intl_timezone, 'format'=>'M d'),
+                'start_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>'M j - ' . $time_format),
+                'end_dt_display'=>array('timezone'=>$intl_timezone, 'format'=>'M j - ' . $time_format),
+                ),
+            ),
         ));
     if( $rc['stat'] != 'ok' ) {
         return $rc;
     }
+    $project_times = array();
+    $dt = new DateTime('now', new DateTimezone($intl_timezone));
+    // Set 4 am as reset time
+    if( $dt->format('H') < 4 ) {
+        $dt->sub(new DateInterval('P1D'));
+    }
+    $start_day = $dt->format('M d');
     if( isset($rc['entries']) ) {
         $entries = $rc['entries'];
         $entry_ids = array();
         foreach($entries as $iid => $entry) {
+            if( $entry['start_day'] == $start_day ) {
+                if( !isset($type_times[$entry['type']]) ) {
+                    $type_times[$entry['type']] = 0;
+                }
+                $type_times[$entry['type']] += $entry['length'];
+            }
+            if( $entry['length'] > 0 ) {
+                $minutes = (int)($entry['length']/60);
+                $hours = (int)($minutes/60);
+                $hour_minutes = ($minutes%60);
+                $entries[$iid]['length_display'] = $hours . ':' . sprintf("%02d", $hour_minutes);
+            }
             $entry_ids[] = $entry['id'];
         }
     } else {

@@ -16,13 +16,27 @@ function ciniki_timetracker_tracker() {
             'addTxt':'Add Entry',
             'addFn':'M.ciniki_timetracker_tracker.entry.open(\'M.ciniki_timetracker_tracker.menu.open();\', 0);',
             },
+        'search':{'label':'', 'type':'livesearchgrid', 'livesearchcols':6,
+            'cellClasses':['multiline', 'multiline', ''],
+            'dataMaps':['name', 'time', 'length'],
+            'hint':'Search entries',
+            'noData':'No entries found',
+            },
         'entries':{'label':'Recent', 'type':'simplegrid', 'num_cols':3,
             'cellClasses':['multiline', 'multiline', ''],
             'dataMaps':['name', 'time', 'length'],
-//            'limit':50,
             },
     }
-
+    this.menu.liveSearchCb = function(s, i, v) {
+        if( s == 'search' && v != '' ) {
+            M.api.getJSONBgCb('ciniki.timetracker.entrySearch', {'tnid':M.curTenantID, 'start_needle':v, 'limit':'25'}, function(rsp) {
+                M.ciniki_timetracker_tracker.menu.liveSearchShow('search',null,M.gE(M.ciniki_timetracker_tracker.menu.panelUID + '_' + s), rsp.entries);
+                });
+        }
+    }
+    this.menu.liveSearchResultValue = function(s, f, i, j, d) {
+        return this.cellValue(s, i, j, d);
+    }
     this.menu.cellValue = function(s, i, j, d) {
         if( s == 'types' ) {
             switch(j) {
@@ -36,7 +50,7 @@ function ciniki_timetracker_tracker() {
                     }
             }
         }
-        if( s == 'entries' ) {
+        if( s == 'entries' || s == 'search' ) {
             if( this.sections['entries'].dataMaps[j] == 'type' ) {
                 return M.multiline(d.type, d.module);
             }
@@ -87,7 +101,7 @@ function ciniki_timetracker_tracker() {
                 return 'M.ciniki_timetracker_tracker.menu.startEntry(\'' + d.id + '\');';
             }
         } */
-        if( s == 'entries' ) {
+        if( s == 'entries' || s == 'search' ) {
             return 'M.ciniki_timetracker_tracker.entry.open(\'M.ciniki_timetracker_tracker.menu.open();\',\'' + d.id + '\');';
         }
     }
@@ -355,6 +369,9 @@ function ciniki_timetracker_tracker() {
             this.menu.sections.entries.cellClasses = ['multiline', 'multiline', ''];
             this.menu.sections.entries.dataMaps = ['type', 'project', 'time', 'length'];
         }
+        this.menu.sections.search.livesearchcols = this.menu.sections.entries.num_cols;
+        this.menu.sections.search.cellClasses = this.menu.sections.entries.cellClasses;
+        this.menu.sections.search.dataMaps = this.menu.sections.entries.dataMaps;
 
         //
         // Create the app container
