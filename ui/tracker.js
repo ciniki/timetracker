@@ -37,6 +37,9 @@ function ciniki_timetracker_tracker() {
     this.menu.liveSearchResultValue = function(s, f, i, j, d) {
         return this.cellValue(s, i, j, d);
     }
+    this.menu.liveSearchResultRowFn = function(s, f, i, j, d) { 
+        return this.rowFn(s, i, d);
+    }
     this.menu.cellValue = function(s, i, j, d) {
         if( s == 'types' ) {
             switch(j) {
