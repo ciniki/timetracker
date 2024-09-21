@@ -16,7 +16,7 @@
 // start_needle:    The search string to search the field for.
 //
 // limit:           (optional) Limit the number of results to be returned. 
-//                  If the limit is not specified, the default is 25.
+//                  If the limit is not specified, the default is 50.
 // 
 // Returns
 // -------
@@ -63,7 +63,7 @@ function ciniki_timetracker_entryFieldSearch($ciniki) {
     if( isset($args['limit']) && $args['limit'] != '' && $args['limit'] > 0 ) {
         $strsql .= "LIMIT " . ciniki_core_dbQuote($ciniki, $args['limit']) . " ";
     } else {
-        $strsql .= "LIMIT 25 ";
+        $strsql .= "LIMIT 50 ";
     }
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     return ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(

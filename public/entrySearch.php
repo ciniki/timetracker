@@ -93,7 +93,7 @@ function ciniki_timetracker_entrySearch($ciniki) {
             . "OR notes LIKE '% " . ciniki_core_dbQuote($ciniki, $args['start_needle']) . "%' "
         . ") "
         . "ORDER BY start_dt DESC "
-        . "LIMIT 50 "
+        . "LIMIT 75 "
         . "";
     ciniki_core_loadMethod($ciniki, 'ciniki', 'core', 'private', 'dbHashQueryArrayTree');
     $rc = ciniki_core_dbHashQueryArrayTree($ciniki, $strsql, 'ciniki.timetracker', array(
